@@ -1,10 +1,10 @@
 import { serve, WebSocket } from "bun";
 import jwt from "jsonwebtoken";
 
-let clients: Set<WebSocket> = new Set();
+// Map to store WebSocket connections with their associated metadata
+const clients: Map<WebSocket, { id: string }> = new Map();
 
 const server = serve({
-  port: 42069,
   fetch: async (request) => {
     const url = new URL(request.url);
     
@@ -16,20 +16,34 @@ const server = serve({
   },
   websocket: {
     open(ws) {
-      console.log('Client connected');
-      clients.add(ws);
+      // Generate a unique ID for the WebSocket connection
+      const id = generateUniqueId();
+      // Store the WebSocket connection in the clients Map with its ID
+      clients.set(ws, { id });
+      
+      console.log(`Client connected (ID: ${id})`); // Log client connection with ID
       ws.send('Hello from server');
     },
     message(ws, message) {
-      console.log('Message from client: ' + message);
+      // Log incoming messages
+      console.log(`Message from client (ID: ${clients.get(ws)?.id}):`, message);
     },
     close(ws) {
-      console.log('Client disconnected');
-      clients.delete(ws);
+      // Log client disconnection
+      const clientInfo = clients.get(ws);
+      if (clientInfo) {
+        console.log(`Client disconnected (ID: ${clientInfo.id})`);
+        clients.delete(ws);
+      } else {
+        console.log('Client disconnected (unknown ID)');
+      }
+    },
+    error(ws, error) {
+      // Log WebSocket errors
+      console.error(`WebSocket error:`, error);
     },
   },
 });
-
 
 async function HandleIotData(request: Request) {
   if (request.method === "POST") {
@@ -37,6 +51,7 @@ async function HandleIotData(request: Request) {
       const data = await request.json();
       console.log('Received IoT data:', data);
 
+      // Broadcast IoT data to all connected clients
       clients.forEach(client => client.send(JSON.stringify(data)));
 
       return new Response("Data received", { status: 200 });
@@ -47,4 +62,9 @@ async function HandleIotData(request: Request) {
   } else {
     return new Response("Method Not Allowed", { status: 405 });
   }
+}
+
+// Function to generate a unique identifier (for example purposes)
+function generateUniqueId(): string {
+  return Math.random().toString(36).substr(2, 9);
 }
