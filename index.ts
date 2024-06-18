@@ -38,10 +38,6 @@ const server = serve({
         console.log('Client disconnected (unknown ID)');
       }
     },
-    error(ws, error) {
-      // Log WebSocket errors
-      console.error(`WebSocket error:`, error);
-    },
   },
 });
 
