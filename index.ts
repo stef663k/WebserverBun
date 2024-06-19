@@ -176,7 +176,7 @@ fetchData().then(({ token, expirationTime, card, checkin, user, role }) => {
       const data = await fetchData();
       const tokenDecode = jwt.decode(data.token);
       // return new Response(JSON.stringify(data.user) { headers: { 'Content-Type': 'application/json' } });
-      return new Response(JSON.stringify(data, tokenDecode), { headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
     },
     websocket: {
       async open(ws) {
