@@ -123,7 +123,7 @@ async function fetchData() {
   }
 }
 const server = serve({
-  port: 42069,
+  port: 80,
   fetch(request, server) {
     const url = new URL(request.url);
     
