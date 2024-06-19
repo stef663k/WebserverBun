@@ -12,14 +12,11 @@ const server = serve({
       return HandleIotData(request);
     }
 
-    return new Response("Not Found", { status: 404 });
+    return new Response("Not Found", { status: 404, headers: { 'Access-Control-Allow-Origin': '*' } });
   },
   websocket: {
     open(ws) {
-      // Generate a unique ID for the WebSocket connection
-      const id = generateUniqueId();
-      // Store the WebSocket connection in the clients Map with its ID      
-      console.log(`Client connected (ID: ${id})`);
+
       ws.send('Hello from server');
     },
     message(ws, message: any) {
@@ -53,7 +50,3 @@ async function HandleIotData(request: Request) {
   }
 }
 
-// Function to generate a unique identifier (for example purposes)
-function generateUniqueId(): string {
-  return Math.random().toString(36).substr(2, 9);
-}
