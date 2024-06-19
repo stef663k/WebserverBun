@@ -1,8 +1,8 @@
-import { serve, WebSocket } from "bun";
+import { serve, type ServerWebSocket } from "bun";
 import jwt from "jsonwebtoken";
 
 // Map to store WebSocket connections with their associated metadata
-const clients: Map<WebSocket, { id: string }> = new Map();
+let clients: Set<ServerWebSocket<unknown>> = new Set();
 
 const server = serve({
   fetch: async (request) => {
@@ -18,27 +18,20 @@ const server = serve({
     open(ws) {
       // Generate a unique ID for the WebSocket connection
       const id = generateUniqueId();
-      // Store the WebSocket connection in the clients Map with its ID
-      clients.set(ws, { id });
-      
-      console.log(`Client connected (ID: ${id})`); // Log client connection with ID
+      // Store the WebSocket connection in the clients Map with its ID      
+      console.log(`Client connected (ID: ${id})`);
       ws.send('Hello from server');
     },
-    message(ws, message) {
+    message(ws, message: any) {
       // Log incoming messages
-      console.log(`Message from client (ID: ${clients.get(ws)?.id}):`, message);
+      console.log('Message received:', message);
     },
     close(ws) {
-      // Log client disconnection
-      const clientInfo = clients.get(ws);
-      if (clientInfo) {
-        console.log(`Client disconnected (ID: ${clientInfo.id})`);
-        clients.delete(ws);
-      } else {
-        console.log('Client disconnected (unknown ID)');
-      }
+      // Remove the WebSocket connection from the clients Map
+      console.log('Client disconnected');
     },
   },
+  port: 42069 // Specify the port for WebSocket server
 });
 
 async function HandleIotData(request: Request) {
