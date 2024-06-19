@@ -28,7 +28,7 @@ const server = serve({
       console.log('Client disconnected');
     },
   },
-  port: 42069 // Specify the port for WebSocket server
+  port: 80 // Specify the port for WebSocket server
 });
 
 async function HandleIotData(request: Request) {
